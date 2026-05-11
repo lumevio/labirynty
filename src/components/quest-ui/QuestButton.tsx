@@ -23,25 +23,55 @@ export default function QuestButton({
     red: 'from-[#A83232] via-[#801A1A] to-[#4D0F0F] text-[#FFB3B3]',
   };
 
+  const handlePress = (e?: any) => {
+    if (disabled) return;
+
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    onClick?.();
+  };
+
   return (
     <motion.button
       type="button"
+
+      // animacje tylko wizualne
       whileHover={disabled ? {} : { y: -2, scale: 1.01 }}
       whileTap={disabled ? {} : { scale: 0.97 }}
-      onClick={onClick}
+
+      // 🔥 UNIFIED EVENT SYSTEM (FIX MOBILE)
+      onClick={handlePress}
+      onTouchEnd={handlePress}
+      onPointerUp={handlePress}
+
       disabled={disabled}
+
       className={`
-        relative w-full rounded-xl p-[2px] font-orbitron font-bold text-xs tracking-wider
-        bg-gradient-to-b from-[#C97A3F] to-[#3D1F08] shadow-lg
+        relative w-full rounded-xl p-[2px]
+        font-orbitron font-bold text-xs tracking-wider
+
+        bg-gradient-to-b from-[#C97A3F] to-[#3D1F08]
+        shadow-lg
+
+        select-none
+        touch-manipulation
+
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
       `}
     >
-      <div className={`
-        relative overflow-hidden rounded-[10px] border border-[#3D1F08] px-4 py-3
-        bg-gradient-to-b ${gradients[variant]}
-      `}>
+      <div
+        className={`
+          relative overflow-hidden rounded-[10px]
+          border border-[#3D1F08] px-4 py-3
+          bg-gradient-to-b ${gradients[variant]}
+        `}
+      >
+        {/* highlight górny */}
         <span className="absolute inset-x-2 top-0.5 h-[2px] rounded-full bg-white/20 blur-[0.5px]" />
+
+        {/* content */}
         <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
           {children}
         </span>
