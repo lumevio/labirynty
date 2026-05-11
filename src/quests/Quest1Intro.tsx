@@ -68,17 +68,27 @@ export default function Quest1Intro({ onComplete, onFail }: StandardQuestProps) 
     setError(false);
   }, [task]);
 
-  const handleComplete = useCallback(() => {
-    completeQuest(1);
-    addCodeFragment({
-      questId: 1,
-      fragment: CODE_FRAGMENT,
-      type: 'digits',
-      discoveredAt: Date.now(),
-    });
-    setMemory('q1_start_code', CODE_FRAGMENT, 1);
-    onComplete();
-  }, []);
+ const handleComplete = useCallback(() => {
+  completeQuest(1);
+
+  addCodeFragment({
+    questId: 1,
+    fragment: CODE_FRAGMENT,
+    type: 'digits',
+    discoveredAt: Date.now(),
+  });
+
+  setMemory('q1_start_code', CODE_FRAGMENT, 1);
+
+  setTask(8); // 🔥 KLUCZOWE – przejście dalej
+  onComplete();
+}, [
+  completeQuest,
+  addCodeFragment,
+  setMemory,
+  setTask,
+  onComplete,
+]);
 
   // Boot engine
   useEffect(() => {
