@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 interface QuestButtonProps {
@@ -23,9 +22,10 @@ export default function QuestButton({
     red: 'from-[#A83232] via-[#801A1A] to-[#4D0F0F] text-[#FFB3B3]',
   };
 
-  const handlePress = (e?: any) => {
+  const handleTrigger = (e?: any) => {
     if (disabled) return;
 
+    // blokada default mobile behaviour (key fix)
     e?.preventDefault?.();
     e?.stopPropagation?.();
 
@@ -33,17 +33,19 @@ export default function QuestButton({
   };
 
   return (
-    <motion.button
+    <button
       type="button"
 
-      // animacje tylko wizualne
-      whileHover={disabled ? {} : { y: -2, scale: 1.01 }}
-      whileTap={disabled ? {} : { scale: 0.97 }}
+      // 🔥 MOBILE-FIRST EVENT SYSTEM
+      onPointerDown={handleTrigger}
+      onPointerUp={handleTrigger}
+      onClick={handleTrigger}
 
-      // 🔥 UNIFIED EVENT SYSTEM (FIX MOBILE)
-      onClick={handlePress}
-      onTouchEnd={handlePress}
-      onPointerUp={handlePress}
+      // 🔥 krytyczne dla telefonów
+      style={{
+        touchAction: 'manipulation',
+        WebkitTapHighlightColor: 'transparent',
+      }}
 
       disabled={disabled}
 
@@ -56,6 +58,7 @@ export default function QuestButton({
 
         select-none
         touch-manipulation
+        pointer-events-auto
 
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         ${className}
@@ -64,18 +67,19 @@ export default function QuestButton({
       <div
         className={`
           relative overflow-hidden rounded-[10px]
-          border border-[#3D1F08] px-4 py-3
+          border border-[#3D1F08]
+          px-4 py-3
           bg-gradient-to-b ${gradients[variant]}
         `}
       >
-        {/* highlight górny */}
+        {/* highlight */}
         <span className="absolute inset-x-2 top-0.5 h-[2px] rounded-full bg-white/20 blur-[0.5px]" />
 
         {/* content */}
-        <span className="relative z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+        <span className="relative z-10">
           {children}
         </span>
       </div>
-    </motion.button>
+    </button>
   );
 }
