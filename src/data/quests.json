@@ -1,0 +1,139 @@
+{
+  "quests": [
+    {
+      "id": 1,
+      "name": "Quest 1",
+      "difficulty": 2,
+      "rewards": {
+        "xp": 100,
+        "coins": 50
+      }
+    },
+    {
+      "id": 2,
+      "name": "Quest 2",
+      "difficulty": 3,
+      "rewards": {
+        "xp": 200,
+        "coins": 100
+      }
+    },
+    {
+      "id": 3,
+      "name": "Quest 3",
+      "difficulty": 1,
+      "rewards": {
+        "xp": 300,
+        "coins": 150
+      }
+    },
+    {
+      "id": 4,
+      "name": "Quest 4",
+      "difficulty": 2,
+      "rewards": {
+        "xp": 400,
+        "coins": 200
+      }
+    },
+    {
+      "id": 5,
+      "name": "Quest 5",
+      "difficulty": 3,
+      "rewards": {
+        "xp": 500,
+        "coins": 250
+      }
+    },
+    {
+      "id": 6,
+      "name": "Quest 6",
+      "difficulty": 1,
+      "rewards": {
+        "xp": 600,
+        "coins": 300
+      }
+    },
+    {
+      "id": 7,
+      "name": "Quest 7",
+      "difficulty": 2,
+      "rewards": {
+        "xp": 700,
+        "coins": 350
+      }
+    },
+    {
+      "id": 8,
+      "name": "Quest 8",
+      "difficulty": 3,
+      "rewards": {
+        "xp": 800,
+        "coins": 400
+      }
+    },
+    {
+      "id": 9,
+      "name": "Quest 9",
+      "difficulty": 1,
+      "rewards": {
+        "xp": 900,
+        "coins": 450
+      }
+    },
+    {
+      "id": 10,
+      "name": "Quest 10",
+      "difficulty": 2,
+      "rewards": {
+        "xp": 1000,
+        "coins": 500
+      }
+    },
+    {
+      "id": 11,
+      "name": "Quest 11",
+      "difficulty": 3,
+      "rewards": {
+        "xp": 1100,
+        "coins": 550
+      }
+    },
+    {
+      "id": 12,
+      "name": "Quest 12",
+      "difficulty": 1,
+      "rewards": {
+        "xp": 1200,
+        "coins": 600
+      }
+    },
+    {
+      "id": 13,
+      "name": "Quest 13",
+      "difficulty": 2,
+      "rewards": {
+        "xp": 1300,
+        "coins": 650
+      }
+    },
+    {
+      "id": 14,
+      "name": "Quest 14",
+      "difficulty": 3,
+      "rewards": {
+        "xp": 1400,
+        "coins": 700
+      }
+    },
+    {
+      "id": 15,
+      "name": "Quest 15",
+      "difficulty": 1,
+      "rewards": {
+        "xp": 1500,
+        "coins": 750
+      }
+    }
+  ]
+}
