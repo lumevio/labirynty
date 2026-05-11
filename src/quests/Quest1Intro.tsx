@@ -784,51 +784,43 @@ export default function Quest1Intro({ onComplete, onFail }: StandardQuestProps) 
     </div>
   </QuestTaskShell>
 )}
+{task === 7 && (
+  <QuestTaskShell
+    key="t7"
+    taskNumber={8}
+    totalTasks={TOTAL_TASKS}
+    taskType="code_input"
+    title={t.fragmentTitle[L]}
+    isActive
+    isCompleted={false}
+  >
+    <div className="space-y-4">
 
-        {/* ============ TASK 7: FRAGMENT REVEAL ============ */}
-        {task === 7 && (
-          <QuestTaskShell
-            key="t7"
-            taskNumber={8}
-            totalTasks={TOTAL_TASKS}
-            taskType="code_input"
-            title={t.fragmentTitle[L]}
-            isActive
-            isCompleted={false}
-          >
-            <div className="space-y-4">
-              {/* Personalized achievement message */}
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="
-                  rounded-xl border-2 border-[#5CBD76]/40
-                  bg-[#5CBD76]/10 p-3 text-center
-                "
-              >
-                <p className="font-orbitron text-[10px] text-[#5CBD76] tracking-widest mb-1">
-                  🏆 {L === 'pl' ? 'PIERWSZE OSIĄGNIĘCIE' : 'FIRST ACHIEVEMENT'}
-                </p>
-                <p className="font-mono text-xs text-[#FFE27A]/80">
-                  {playerAvatar} {playerName} {L === 'pl' ? 'odkrywa pierwszy fragment!' : 'discovers first fragment!'}
-                </p>
-              </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="
+          rounded-xl border-2 border-[#5CBD76]/40
+          bg-[#5CBD76]/10 p-3 text-center
+        "
+      >
+        <p className="font-orbitron text-[10px] text-[#5CBD76] tracking-widest mb-1">
+          🏆 {L === 'pl' ? 'PIERWSZE OSIĄGNIĘCIE' : 'FIRST ACHIEVEMENT'}
+        </p>
 
-              <CodeFragmentReveal
-                fragment={{
-                  questId: 1,
-                  fragment: CODE_FRAGMENT,
-                  type: 'digits',
-                  discoveredAt: Date.now(),
-                }}
-                lang={L}
-                onContinue={handleComplete}
-              />
-            </div>
-          </QuestTaskShell>
-        )}
+        <p className="font-mono text-xs text-[#FFE27A]/80">
+          {playerAvatar} {playerName}
+        </p>
+      </motion.div>
 
-      </AnimatePresence>
-    </QuestFrame>
-  );
-}
+      <CodeFragmentReveal
+        fragment={finalFragment}
+        lang={L}
+        onContinue={() => {
+          handleComplete();
+        }}
+      />
+
+    </div>
+  </QuestTaskShell>
+)}
