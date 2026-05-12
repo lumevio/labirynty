@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../hooks/useTranslation';
 import { useGameStore } from '../systems/GameState';
+
 import QuestFrame from '../components/quest-ui/QuestFrame';
 import QuestButton from '../components/quest-ui/QuestButton';
 import QuestTaskShell from '../components/quest-ui/QuestTaskShell';
 import BackRefPrompt from '../components/quest-ui/BackRefPrompt';
 import MemoryLockInput from '../components/quest-ui/MemoryLockInput';
-import CodeFragmentReveal from '../components/quest-ui/CodeFragmentReveal';
+
 import type { StandardQuestProps } from '../components/quest-ui/StandardQuestProps';
 
 const TOTAL_TASKS = 6;
@@ -21,7 +22,10 @@ interface QuizQuestion {
   physicalHint?: { pl: string; en: string };
 }
 
-export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
+export default function Quest3Quiz({
+  onComplete,
+  onFail,
+}: StandardQuestProps) {
   const { lang } = useTranslation();
   const L = lang === 'pl' ? 'pl' : 'en';
 
@@ -36,22 +40,30 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
   } = useGameStore();
 
   const [task, setTask] = useState(0);
+
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
+
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [answerState, setAnswerState] = useState<'idle' | 'correct' | 'wrong'>('idle');
+
+  const [answerState, setAnswerState] = useState<
+    'idle' | 'correct' | 'wrong'
+  >('idle');
+
   const [locked, setLocked] = useState(false);
+
   const [memoryUnlocked, setMemoryUnlocked] = useState(false);
 
   useEffect(() => {
     initQuest(3, TOTAL_TASKS);
-  }, []);
+  }, [initQuest]);
 
   const nextTask = useCallback(() => {
     completeTask(3, task);
+
     addScore(15);
 
-    setTask((t) => t + 1);
+    setTask((prev) => prev + 1);
 
     setSelectedAnswer(null);
     setAnswerState('idle');
@@ -65,7 +77,7 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
       questId: 3,
       fragment: CODE_FRAGMENT,
       type: 'word',
-      discoveredAt: 0,
+      discoveredAt: Date.now(),
     });
 
     setMemory('q3_quiz_word', CODE_FRAGMENT, 3);
@@ -78,71 +90,81 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
     onComplete,
   ]);
 
-  const stableFragment = useMemo(() => ({
-    questId: 3,
-    fragment: CODE_FRAGMENT,
-    type: 'word' as const,
-    discoveredAt: 0,
-  }), []);
+  /* ---------------- QUESTIONS ---------------- */
 
-  /* ---- PYTANIA ---- */
-  const questions: QuizQuestion[] = useMemo(() => [
-    {
-      q: {
-        pl: 'W którym kraju znajduje się Zator?',
-        en: 'In which country is Zator located?',
+  const questions: QuizQuestion[] = useMemo(
+    () => [
+      {
+        q: {
+          pl: 'W którym kraju znajduje się Zator?',
+          en: 'In which country is Zator located?',
+        },
+
+        answers: {
+          pl: ['Niemcy', 'Polska', 'Czechy', 'Słowacja'],
+          en: ['Germany', 'Poland', 'Czechia', 'Slovakia'],
+        },
+
+        correct: 1,
+        type: 'basic',
       },
-      answers: {
-        pl: ['Niemcy', 'Polska', 'Czechy', 'Słowacja'],
-        en: ['Germany', 'Poland', 'Czechia', 'Slovakia'],
+
+      {
+        q: {
+          pl: 'Ile rzędów ziaren ma typowa kolba kukurydzy?',
+          en: 'How many rows of kernels does a typical corn cob have?',
+        },
+
+        answers: {
+          pl: ['8–10', '14–20', '24–30', '32+'],
+          en: ['8–10', '14–20', '24–30', '32+'],
+        },
+
+        correct: 1,
+        type: 'logic',
       },
-      correct: 1,
-      type: 'basic',
-    },
-    {
-      q: {
-        pl: 'Ile rzędów ziaren ma typowa kolba kukurydzy?',
-        en: 'How many rows of kernels does a typical corn cob have?',
+
+      {
+        q: {
+          pl: 'Jaki kolor ma NAJWIĘKSZA tabliczka przy wejściu do labiryntu?',
+          en: 'What color is the LARGEST sign at the maze entrance?',
+        },
+
+        answers: {
+          pl: ['Czerwona', 'Żółta', 'Zielona', 'Niebieska'],
+          en: ['Red', 'Yellow', 'Green', 'Blue'],
+        },
+
+        correct: 1,
+
+        type: 'observation',
+
+        physicalHint: {
+          pl: '📍 Obejrzyj tabliczki przy WEJŚCIU GŁÓWNYM',
+          en: '📍 Check signs at the MAIN ENTRANCE',
+        },
       },
-      answers: {
-        pl: ['8–10', '14–20', '24–30', '32+'],
-        en: ['8–10', '14–20', '24–30', '32+'],
-      },
-      correct: 1,
-      type: 'logic',
-    },
-    {
-      q: {
-        pl: 'Jaki kolor ma NAJWIĘKSZA tabliczka przy wejściu do labiryntu?',
-        en: 'What color is the LARGEST sign at the maze entrance?',
-      },
-      answers: {
-        pl: ['Czerwona', 'Żółta', 'Zielona', 'Niebieska'],
-        en: ['Red', 'Yellow', 'Green', 'Blue'],
-      },
-      correct: 1,
-      type: 'observation',
-      physicalHint: {
-        pl: '📍 Obejrzyj tabliczki przy WEJŚCIU GŁÓWNYM',
-        en: '📍 Check signs at the MAIN ENTRANCE',
-      },
-    },
-  ], []);
+    ],
+    []
+  );
 
   const handleAnswer = (answerIndex: number) => {
     if (locked) return;
 
     setLocked(true);
+
     setSelectedAnswer(answerIndex);
 
-    const isCorrect = answerIndex === questions[task].correct;
+    const isCorrect =
+      answerIndex === questions[task].correct;
 
     setAnswerState(isCorrect ? 'correct' : 'wrong');
 
     setTimeout(() => {
       if (isCorrect) {
-        setScore((s) => s + 1);
-        setStreak((s) => s + 1);
+        setScore((prev) => prev + 1);
+
+        setStreak((prev) => prev + 1);
 
         nextTask();
       } else {
@@ -152,16 +174,22 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
           onFail();
         } else {
           setLocked(false);
+
           setSelectedAnswer(null);
+
           setAnswerState('idle');
         }
       }
     }, 800);
   };
 
-  /* ---- TŁUMACZENIA UI ---- */
+  /* ---------------- UI ---------------- */
+
   const ui = {
-    title: { pl: 'QUIZ LABIRYNTOWY', en: 'MAZE QUIZ' },
+    title: {
+      pl: 'QUIZ LABIRYNTOWY',
+      en: 'MAZE QUIZ',
+    },
 
     backrefTitle: {
       pl: 'WERYFIKACJA KRZYŻOWA',
@@ -188,48 +216,69 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
     <QuestFrame title={`QUEST 3 — ${ui.title[L]}`}>
 
       {/* HUD */}
-      <div className="flex justify-between text-[10px] font-mono text-[#FFE27A]/50 mb-4 bg-[#1A0C03]/40 p-2 rounded-lg">
+      <div
+        className="
+          flex justify-between
+          text-[10px] font-mono text-[#FFE27A]/50
+          mb-4
+          bg-[#1A0C03]/40
+          p-2
+          rounded-lg
+        "
+      >
         <span>📝 {task + 1}/{TOTAL_TASKS}</span>
+
         <span>🎯 {score}</span>
+
         <span>⚡ ×{streak}</span>
       </div>
 
       <AnimatePresence mode="wait">
 
-        {/* ============ TASKS 0-2: QUIZ QUESTIONS ============ */}
+        {/* ============ TASKS 0-2 ============ */}
         {task < 3 && (
           <QuestTaskShell
             key={`quiz-${task}`}
             taskNumber={task + 1}
             totalTasks={TOTAL_TASKS}
-            taskType={questions[task].type === 'observation' ? 'observation' : 'question'}
+            taskType={
+              questions[task].type === 'observation'
+                ? 'observation'
+                : 'question'
+            }
             title={questions[task].q[L]}
             isActive
             isCompleted={false}
-            physicalHint={questions[task].physicalHint?.[L]}
+            physicalHint={
+              questions[task].physicalHint?.[L]
+            }
           >
             <div className="space-y-2">
-              {questions[task].answers[L].map((answer, i) => (
-                <QuestButton
-                  key={i}
-                  onClick={() => handleAnswer(i)}
-                  disabled={locked}
-                  variant={
-                    selectedAnswer === i
-                      ? answerState === 'correct'
-                        ? 'green'
-                        : 'red'
-                      : 'wood'
-                  }
-                >
-                  {answer}
-                </QuestButton>
-              ))}
+
+              {questions[task].answers[L].map(
+                (answer, i) => (
+                  <QuestButton
+                    key={i}
+                    onClick={() => handleAnswer(i)}
+                    disabled={locked}
+                    variant={
+                      selectedAnswer === i
+                        ? answerState === 'correct'
+                          ? 'green'
+                          : 'red'
+                        : 'wood'
+                    }
+                  >
+                    {answer}
+                  </QuestButton>
+                )
+              )}
+
             </div>
           </QuestTaskShell>
         )}
 
-        {/* ============ TASK 3: BACK-REFERENCE TO Q1 ============ */}
+        {/* ============ TASK 3 ============ */}
         {task === 3 && (
           <QuestTaskShell
             key="backref"
@@ -267,8 +316,16 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
                 });
               }}
               onSubmitCode={(code) => {
-                if (code === '37') {
-                  setMemory('q3_verified_q1_code', code, 3);
+                const clean =
+                  code.trim().toUpperCase();
+
+                if (clean === '37') {
+                  setMemory(
+                    'q3_verified_q1_code',
+                    clean,
+                    3
+                  );
+
                   nextTask();
                 }
               }}
@@ -277,7 +334,7 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
           </QuestTaskShell>
         )}
 
-        {/* ============ TASK 4: MEMORY LOCK (from Q1) ============ */}
+        {/* ============ TASK 4 ============ */}
         {task === 4 && (
           <QuestTaskShell
             key="memlock"
@@ -307,17 +364,32 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
                 lang={L}
               />
 
-              {/* SUCCESS STATE */}
               {memoryUnlocked && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{
+                    opacity: 0,
+                    y: 10,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    y: 0,
+                  }}
                   className="
-                    rounded-xl border border-[#5CBD76]/40
-                    bg-[#5CBD76]/10 p-4 text-center
+                    rounded-xl
+                    border border-[#5CBD76]/40
+                    bg-[#5CBD76]/10
+                    p-4
+                    text-center
                   "
                 >
-                  <p className="font-orbitron text-sm text-[#5CBD76] mb-3">
+                  <p
+                    className="
+                      font-orbitron
+                      text-sm
+                      text-[#5CBD76]
+                      mb-3
+                    "
+                  >
                     ✅ {L === 'pl'
                       ? 'PAMIĘĆ ODBLOKOWANA'
                       : 'MEMORY UNLOCKED'}
@@ -326,9 +398,11 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
                   <QuestButton
                     onClick={() => {
                       setMemoryUnlocked(false);
+
                       nextTask();
                     }}
                     variant="green"
+                    className="min-h-[56px]"
                   >
                     {L === 'pl'
                       ? 'PRZEJDŹ DALEJ →'
@@ -341,24 +415,97 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
           </QuestTaskShell>
         )}
 
-        {/* ============ TASK 5: CODE FRAGMENT REVEAL ============ */}
+        {/* ============ TASK 5 ============ */}
         {task === 5 && (
           <QuestTaskShell
             key="fragment"
             taskNumber={6}
             totalTasks={TOTAL_TASKS}
             taskType="code_input"
-            title={L === 'pl'
-              ? 'FRAGMENT ODKRYTY'
-              : 'FRAGMENT DISCOVERED'}
+            title={
+              L === 'pl'
+                ? 'FRAGMENT ODKRYTY'
+                : 'FRAGMENT DISCOVERED'
+            }
             isActive
             isCompleted={false}
           >
-            <CodeFragmentReveal
-              fragment={stableFragment}
-              lang={L}
-              onContinue={handleComplete}
-            />
+            <div className="space-y-4">
+
+              <motion.div
+                initial={{
+                  opacity: 0,
+                  scale: 0.92,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                transition={{
+                  duration: 0.4,
+                }}
+                className="
+                  rounded-2xl
+                  border-2 border-[#FFE27A]/40
+                  bg-gradient-to-b
+                  from-[#5C2E0A]/40
+                  to-[#1A0C03]
+                  p-6
+                  text-center
+                "
+              >
+                <p
+                  className="
+                    font-orbitron
+                    text-[10px]
+                    tracking-[0.3em]
+                    text-[#C97A3F]
+                    mb-3
+                  "
+                >
+                  {L === 'pl'
+                    ? 'ODKRYTY FRAGMENT'
+                    : 'DISCOVERED FRAGMENT'}
+                </p>
+
+                <motion.div
+                  animate={{
+                    scale: [1, 1.05, 1],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                  }}
+                  className="
+                    text-5xl
+                    font-black
+                    font-orbitron
+                    tracking-[0.3em]
+                    text-[#FFE27A]
+                    drop-shadow-[0_0_15px_rgba(255,226,122,0.5)]
+                  "
+                >
+                  {CODE_FRAGMENT}
+                </motion.div>
+
+                <p className="mt-4 text-xs text-[#FFE27A]/70">
+                  {L === 'pl'
+                    ? 'Zapamiętaj ten fragment. Będzie potrzebny później.'
+                    : 'Remember this fragment. It will be needed later.'}
+                </p>
+              </motion.div>
+
+              <QuestButton
+                onClick={handleComplete}
+                variant="gold"
+                className="min-h-[56px]"
+              >
+                🚀 {L === 'pl'
+                  ? 'ZAKOŃCZ QUEST'
+                  : 'FINISH QUEST'}
+              </QuestButton>
+
+            </div>
           </QuestTaskShell>
         )}
 
