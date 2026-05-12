@@ -31,8 +31,6 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
     completeQuest,
     addCodeFragment,
     setMemory,
-    getMemory,
-    hasMemory,
     addScore,
     requestBackRef,
   } = useGameStore();
@@ -43,30 +41,49 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [answerState, setAnswerState] = useState<'idle' | 'correct' | 'wrong'>('idle');
   const [locked, setLocked] = useState(false);
-  const [showFragment, setShowFragment] = useState(false);
+  const [memoryUnlocked, setMemoryUnlocked] = useState(false);
 
-  useEffect(() => { initQuest(3, TOTAL_TASKS); }, []);
+  useEffect(() => {
+    initQuest(3, TOTAL_TASKS);
+  }, []);
 
   const nextTask = useCallback(() => {
     completeTask(3, task);
     addScore(15);
+
     setTask((t) => t + 1);
+
     setSelectedAnswer(null);
     setAnswerState('idle');
     setLocked(false);
-  }, [task]);
+  }, [task, completeTask, addScore]);
 
   const handleComplete = useCallback(() => {
     completeQuest(3);
+
     addCodeFragment({
       questId: 3,
       fragment: CODE_FRAGMENT,
       type: 'word',
-      discoveredAt: Date.now(),
+      discoveredAt: 0,
     });
+
     setMemory('q3_quiz_word', CODE_FRAGMENT, 3);
+
     onComplete();
-  }, []);
+  }, [
+    completeQuest,
+    addCodeFragment,
+    setMemory,
+    onComplete,
+  ]);
+
+  const stableFragment = useMemo(() => ({
+    questId: 3,
+    fragment: CODE_FRAGMENT,
+    type: 'word' as const,
+    discoveredAt: 0,
+  }), []);
 
   /* ---- PYTANIA ---- */
   const questions: QuizQuestion[] = useMemo(() => [
@@ -126,6 +143,7 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
       if (isCorrect) {
         setScore((s) => s + 1);
         setStreak((s) => s + 1);
+
         nextTask();
       } else {
         setStreak(0);
@@ -144,12 +162,22 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
   /* ---- TŁUMACZENIA UI ---- */
   const ui = {
     title: { pl: 'QUIZ LABIRYNTOWY', en: 'MAZE QUIZ' },
-    backrefTitle: { pl: 'WERYFIKACJA KRZYŻOWA', en: 'CROSS VERIFICATION' },
+
+    backrefTitle: {
+      pl: 'WERYFIKACJA KRZYŻOWA',
+      en: 'CROSS VERIFICATION',
+    },
+
     backrefDesc: {
       pl: 'Aby kontynuować, musisz wrócić do Questa 1 i odczytać 2-cyfrowy kod startowy z tabliczki.',
       en: 'To continue, return to Quest 1 and read the 2-digit start code from the sign.',
     },
-    memoryTitle: { pl: 'BLOKADA PAMIĘCI', en: 'MEMORY LOCK' },
+
+    memoryTitle: {
+      pl: 'BLOKADA PAMIĘCI',
+      en: 'MEMORY LOCK',
+    },
+
     memoryDesc: {
       pl: 'Wpisz liczbę żółtych tabliczek, którą zapamiętałeś z Questa 1.',
       en: 'Enter the number of yellow signs you memorized from Quest 1.',
@@ -158,6 +186,7 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
 
   return (
     <QuestFrame title={`QUEST 3 — ${ui.title[L]}`}>
+
       {/* HUD */}
       <div className="flex justify-between text-[10px] font-mono text-[#FFE27A]/50 mb-4 bg-[#1A0C03]/40 p-2 rounded-lg">
         <span>📝 {task + 1}/{TOTAL_TASKS}</span>
@@ -166,6 +195,7 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
       </div>
 
       <AnimatePresence mode="wait">
+
         {/* ============ TASKS 0-2: QUIZ QUESTIONS ============ */}
         {task < 3 && (
           <QuestTaskShell
@@ -210,13 +240,25 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
             description={ui.backrefDesc[L]}
             isActive
             isCompleted={false}
-            physicalHint={L === 'pl' ? 'WRÓĆ DO WEJŚCIA GŁÓWNEGO' : 'RETURN TO MAIN ENTRANCE'}
+            physicalHint={
+              L === 'pl'
+                ? 'WRÓĆ DO WEJŚCIA GŁÓWNEGO'
+                : 'RETURN TO MAIN ENTRANCE'
+            }
           >
             <BackRefPrompt
               targetQuest={1}
               targetTask={2}
-              hint={L === 'pl' ? 'Kod 2-cyfrowy z odwrotu tabliczki NFC' : '2-digit code from NFC sign back'}
-              physicalLocation={L === 'pl' ? 'WEJŚCIE GŁÓWNE — SŁUPEK ⚡' : 'MAIN ENTRANCE — POST ⚡'}
+              hint={
+                L === 'pl'
+                  ? 'Kod 2-cyfrowy z odwrotu tabliczki NFC'
+                  : '2-digit code from NFC sign back'
+              }
+              physicalLocation={
+                L === 'pl'
+                  ? 'WEJŚCIE GŁÓWNE — SŁUPEK ⚡'
+                  : 'MAIN ENTRANCE — POST ⚡'
+              }
               onNavigate={() => {
                 requestBackRef({
                   targetQuest: 1,
@@ -247,15 +289,55 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
             isActive
             isCompleted={false}
           >
-            <MemoryLockInput
-              memoryKey="q1_yellow_signs"
-              expectedValue="3"
-              sourceQuest={1}
-              hint={L === 'pl' ? 'Ile żółtych tabliczek widziałeś przy wejściu?' : 'How many yellow signs did you see at the entrance?'}
-              onUnlock={nextTask}
-              onFail={onFail}
-              lang={L}
-            />
+            <div className="space-y-4">
+
+              <MemoryLockInput
+                memoryKey="q1_yellow_signs"
+                expectedValue="3"
+                sourceQuest={1}
+                hint={
+                  L === 'pl'
+                    ? 'Ile żółtych tabliczek widziałeś przy wejściu?'
+                    : 'How many yellow signs did you see at the entrance?'
+                }
+                onUnlock={() => {
+                  setMemoryUnlocked(true);
+                }}
+                onFail={onFail}
+                lang={L}
+              />
+
+              {/* SUCCESS STATE */}
+              {memoryUnlocked && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="
+                    rounded-xl border border-[#5CBD76]/40
+                    bg-[#5CBD76]/10 p-4 text-center
+                  "
+                >
+                  <p className="font-orbitron text-sm text-[#5CBD76] mb-3">
+                    ✅ {L === 'pl'
+                      ? 'PAMIĘĆ ODBLOKOWANA'
+                      : 'MEMORY UNLOCKED'}
+                  </p>
+
+                  <QuestButton
+                    onClick={() => {
+                      setMemoryUnlocked(false);
+                      nextTask();
+                    }}
+                    variant="green"
+                  >
+                    {L === 'pl'
+                      ? 'PRZEJDŹ DALEJ →'
+                      : 'CONTINUE →'}
+                  </QuestButton>
+                </motion.div>
+              )}
+
+            </div>
           </QuestTaskShell>
         )}
 
@@ -266,22 +348,20 @@ export default function Quest3Quiz({ onComplete, onFail }: StandardQuestProps) {
             taskNumber={6}
             totalTasks={TOTAL_TASKS}
             taskType="code_input"
-            title={L === 'pl' ? 'FRAGMENT ODKRYTY' : 'FRAGMENT DISCOVERED'}
+            title={L === 'pl'
+              ? 'FRAGMENT ODKRYTY'
+              : 'FRAGMENT DISCOVERED'}
             isActive
             isCompleted={false}
           >
             <CodeFragmentReveal
-              fragment={{
-                questId: 3,
-                fragment: CODE_FRAGMENT,
-                type: 'word',
-                discoveredAt: Date.now(),
-              }}
+              fragment={stableFragment}
               lang={L}
               onContinue={handleComplete}
             />
           </QuestTaskShell>
         )}
+
       </AnimatePresence>
     </QuestFrame>
   );
